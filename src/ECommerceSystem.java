@@ -3,7 +3,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Main e-commerce system handling checkout operations.
+ * Fawry Assessment e-commerce system .
  */
 public class ECommerceSystem {
 

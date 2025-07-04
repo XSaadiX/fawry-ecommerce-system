@@ -2,7 +2,7 @@ import java.time.LocalDate;
 import java.util.Objects;
 
 /**
- * Represents a product that can expire (e.g., food items).
+ * Represents a product that can expire
  */
 public class PerishableProduct extends Product {
     private final LocalDate expirationDate;
