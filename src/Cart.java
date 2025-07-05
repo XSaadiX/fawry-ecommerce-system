@@ -1,25 +1,19 @@
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+// Simple cart using arrays with exception handling
+class Cart {
+    CartItem[] items;
+    int itemCount;
 
-/**
- * Represents a shopping cart containing products.
- */
-public class Cart {
-    private final List<CartItem> items;
-
-    public Cart() {
-        this.items = new ArrayList<>();
+    Cart() {
+        items = new CartItem[20]; // Fixed size array
+        itemCount = 0;
     }
 
-    public void add(Product product, int quantity) throws ECommerceException {
-        Objects.requireNonNull(product, "Product cannot be null");
-
-        if (quantity <= 0) {
-            throw new ECommerceException("Quantity must be positive");
+    void add(Product product, int quantity) throws ECommerceException {
+        if (itemCount >= 20) {
+            throw new ECommerceException("Cart is full!");
         }
 
-        if (!product.isAvailable(quantity)) {
+        if (!product.hasStock(quantity)) {
             throw new ECommerceException("Insufficient stock for " + product.getName() +
                     ". Available: " + product.getQuantity() + ", Requested: " + quantity);
         }
@@ -28,29 +22,27 @@ public class Cart {
             throw new ECommerceException("Product " + product.getName() + " is expired");
         }
 
-        items.add(new CartItem(product, quantity));
+        items[itemCount] = new CartItem(product, quantity);
+        itemCount++;
     }
 
-    public List<CartItem> getItems() {
-        return new ArrayList<>(items);
+    boolean isEmpty() {
+        return itemCount == 0;
     }
 
-    public boolean isEmpty() {
-        return items.isEmpty();
+    double getSubtotal() {
+        double total = 0;
+        for (int i = 0; i < itemCount; i++) {
+            total = total + items[i].getTotalPrice();
+        }
+        return total;
     }
 
-    public double getSubtotal() {
-        return items.stream()
-                .mapToDouble(CartItem::getTotalPrice)
-                .sum();
+    CartItem[] getItems() {
+        return items;
     }
 
-    public void clear() {
-        items.clear();
-    }
-
-    @Override
-    public String toString() {
-        return String.format("Cart{items=%d, subtotal=%.2f}", items.size(), getSubtotal());
+    int getItemCount() {
+        return itemCount;
     }
 }

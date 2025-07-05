@@ -1,40 +1,26 @@
-import java.util.Objects;
+// Customer class to handle customer data and balance
+class Customer {
+    String name;
+    double balance;
 
-/**
- * Represents a customer in the e-commerce system.
- */
-public class Customer {
-    private final String name;
-    private double balance;
-
-    public Customer(String name, double balance) {
-        this.name = Objects.requireNonNull(name, "Customer name cannot be null");
-        if (balance < 0) {
-            throw new IllegalArgumentException("Customer balance cannot be negative");
-        }
+    Customer(String name, double balance) {
+        this.name = name;
         this.balance = balance;
     }
 
-    public String getName() {
+    String getName() {
         return name;
     }
 
-    public double getBalance() {
+    double getBalance() {
         return balance;
     }
 
-    public void deductBalance(double amount) {
-        if (amount <= 0) {
-            throw new IllegalArgumentException("Deduction amount must be positive");
-        }
-        if (amount > balance) {
-            throw new IllegalArgumentException("Insufficient balance");
-        }
-        this.balance -= amount;
+    void pay(double amount) {
+        balance = balance - amount;
     }
 
-    @Override
-    public String toString() {
-        return String.format("Customer{name='%s', balance=%.2f}", name, balance);
+    boolean canPay(double amount) {
+        return balance >= amount;
     }
 }

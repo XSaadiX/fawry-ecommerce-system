@@ -1,7 +1,5 @@
-/**
- * Interface for items that can be shipped.
- */
-public interface Shippable {
+// Simple shipping interface as required by Fawry challenge
+interface Shippable {
     String getName();
     double getWeight();
 }

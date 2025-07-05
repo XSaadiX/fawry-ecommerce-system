@@ -1,143 +1,149 @@
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-
-/**
- * Fawry Assessment e-commerce system .
- */
+// Main e-commerce system with exception handling
 public class ECommerceSystem {
 
-    public static void checkout(Customer customer, Cart cart) {
-        try {
-            validateCheckout(customer, cart);
-
-            double subtotal = cart.getSubtotal();
-            List<Shippable> shippableItems = collectShippableItems(cart);
-            double shippingFee = ShippingService.calculateShippingFee(shippableItems);
-            double totalAmount = subtotal + shippingFee;
-
-            validatePayment(customer, totalAmount);
-
-            processPayment(customer, totalAmount);
-            updateInventory(cart);
-
-            ShippingService.processShipment(shippableItems);
-            printReceipt(cart, subtotal, shippingFee, totalAmount, customer.getBalance());
-
-        } catch (ECommerceException e) {
-            System.err.println("Checkout failed: " + e.getMessage());
-        }
-    }
-
-    private static void validateCheckout(Customer customer, Cart cart) throws ECommerceException {
-        if (customer == null) {
-            throw new ECommerceException("Customer cannot be null");
-        }
-
-        if (cart == null || cart.isEmpty()) {
+    static void checkout(Customer customer, Cart cart) throws ECommerceException {
+        // Check if cart is empty
+        if (cart.isEmpty()) {
             throw new ECommerceException("Cart is empty");
         }
 
-        for (CartItem item : cart.getItems()) {
-            Product product = item.getProduct();
-
-            if (!product.isAvailable(item.getQuantity())) {
-                throw new ECommerceException("Product " + product.getName() + " is out of stock");
+        // Check stock and expiration for all items
+        for (int i = 0; i < cart.getItemCount(); i++) {
+            CartItem item = cart.getItems()[i];
+            if (!item.getProduct().hasStock(item.getQuantity())) {
+                throw new ECommerceException("Product " + item.getProduct().getName() + " is out of stock");
             }
-
-            if (product.isExpired()) {
-                throw new ECommerceException("Product " + product.getName() + " is expired");
+            if (item.getProduct().isExpired()) {
+                throw new ECommerceException("Product " + item.getProduct().getName() + " is expired");
             }
         }
-    }
 
-    private static List<Shippable> collectShippableItems(Cart cart) {
-        List<Shippable> shippableItems = new ArrayList<>();
+        // Calculate costs
+        double subtotal = cart.getSubtotal();
 
-        for (CartItem item : cart.getItems()) {
-            if (item.getProduct().requiresShipping()) {
-                for (int i = 0; i < item.getQuantity(); i++) {
-                    shippableItems.add(new ShippingItem(
+        // Collect shipping items
+        Shippable[] shippingItems = new Shippable[100]; // Max possible items
+        int shippingCount = 0;
+
+        for (int i = 0; i < cart.getItemCount(); i++) {
+            CartItem item = cart.getItems()[i];
+            if (item.getProduct().needsShipping()) {
+                // Add each quantity as separate shipping item
+                for (int j = 0; j < item.getQuantity(); j++) {
+                    shippingItems[shippingCount] = new ShippingItem(
                             item.getProduct().getName(),
                             item.getProduct().getWeight()
-                    ));
+                    );
+                    shippingCount++;
                 }
             }
         }
 
-        return shippableItems;
-    }
+        double shippingFee = ShippingService.calculateShipping(shippingItems, shippingCount);
+        double totalAmount = subtotal + shippingFee;
 
-    private static void validatePayment(Customer customer, double amount) throws ECommerceException {
-        if (customer.getBalance() < amount) {
+        // Check customer balance
+        if (!customer.canPay(totalAmount)) {
             throw new ECommerceException("Customer's balance is insufficient");
         }
-    }
 
-    private static void processPayment(Customer customer, double amount) {
-        customer.deductBalance(amount);
-    }
+        // Process payment and update stock
+        customer.pay(totalAmount);
 
-    private static void updateInventory(Cart cart) {
-        for (CartItem item : cart.getItems()) {
-            item.getProduct().reduceQuantity(item.getQuantity());
+        for (int i = 0; i < cart.getItemCount(); i++) {
+            CartItem item = cart.getItems()[i];
+            item.getProduct().reduceStock(item.getQuantity());
         }
-    }
 
-    private static void printReceipt(Cart cart, double subtotal, double shippingFee,
-                                     double totalAmount, double remainingBalance) {
+        // Print shipping notice and receipt
+        ShippingService.processShipment(shippingItems, shippingCount);
+
         System.out.println("** Checkout receipt **");
-
-        for (CartItem item : cart.getItems()) {
-            System.out.printf("%dx %s %d%n",
-                    item.getQuantity(),
-                    item.getProduct().getName(),
-                    (int) item.getTotalPrice());
+        for (int i = 0; i < cart.getItemCount(); i++) {
+            CartItem item = cart.getItems()[i];
+            System.out.println(item.getQuantity() + "x " + item.getProduct().getName() + " " + (int)item.getTotalPrice());
         }
-
         System.out.println("----------------------");
-        System.out.printf("Subtotal %d%n", (int) subtotal);
-        System.out.printf("Shipping %d%n", (int) shippingFee);
-        System.out.printf("Amount %d%n", (int) totalAmount);
-        System.out.printf("Customer current balance after payment: %.2f%n", remainingBalance);
+        System.out.println("Subtotal " + (int)subtotal);
+        System.out.println("Shipping " + (int)shippingFee);
+        System.out.println("Amount " + (int)totalAmount);
+        System.out.println("Customer current balance after payment: " + customer.getBalance());
         System.out.println("END.");
     }
 
     public static void main(String[] args) {
-        System.out.println("=== Fawry E-commerce System ===\n");
+        System.out.println("=== Fawry E-commerce System Demo ===\n");
 
-        Product cheese = new PerishableProduct("Cheese", 100.0, 10,
-                LocalDate.now().plusDays(7), true, 0.4);
-        Product biscuits = new PerishableProduct("Biscuits", 150.0, 5,
-                LocalDate.now().plusDays(30), true, 0.7);
-        Product tv = new NonPerishableProduct("TV", 500.0, 3, true, 15.0);
-        Product mobile = new NonPerishableProduct("Mobile", 300.0, 8, true, 0.2);
-        Product scratchCard = new NonPerishableProduct("Scratch Card", 50.0, 20, false, 0.0);
+        // Create products
+        ExpirableProduct cheese = new ExpirableProduct("Cheese", 100.0, 10, false, true, 0.4);
+        ExpirableProduct biscuits = new ExpirableProduct("Biscuits", 150.0, 5, false, true, 0.7);
+        NonExpirableProduct tv = new NonExpirableProduct("TV", 500.0, 3, true, 15.0);
+        NonExpirableProduct scratchCard = new NonExpirableProduct("Scratch Card", 50.0, 20, false, 0.0);
 
+        // Create customer
         Customer customer = new Customer("John Doe", 1000.0);
 
+        // Test Case 1: Successful checkout
         System.out.println("=== Test Case 1: Successful Checkout ===");
         try {
-            Cart cart = new Cart();
-            cart.add(cheese, 2);
-            cart.add(biscuits, 1);
-            cart.add(scratchCard, 1);
-            checkout(customer, cart);
+            Cart cart1 = new Cart();
+            cart1.add(cheese, 2);
+            cart1.add(biscuits, 1);
+            cart1.add(scratchCard, 1);
+            checkout(customer, cart1);
         } catch (ECommerceException e) {
-            System.err.println("Error: " + e.getMessage());
+            System.out.println("Error: " + e.getMessage());
         }
 
+        // Test Case 2: Empty cart
         System.out.println("\n=== Test Case 2: Empty Cart Error ===");
-        Cart emptyCart = new Cart();
-        checkout(customer, emptyCart);
+        try {
+            Cart emptyCart = new Cart();
+            checkout(customer, emptyCart);
+        } catch (ECommerceException e) {
+            System.out.println("Error: " + e.getMessage());
+        }
 
+        // Test Case 3: Insufficient stock
         System.out.println("\n=== Test Case 3: Insufficient Stock Error ===");
         try {
-            Cart cart = new Cart();
-            cart.add(tv, 5);
-            checkout(customer, cart);
+            Cart cart2 = new Cart();
+            cart2.add(tv, 5); // Only 3 TVs available
+            checkout(customer, cart2);
         } catch (ECommerceException e) {
-            System.err.println("Error: " + e.getMessage());
+            System.out.println("Error: " + e.getMessage());
+        }
+
+        // Test Case 4: Expired product
+        System.out.println("\n=== Test Case 4: Expired Product Error ===");
+        try {
+            ExpirableProduct expiredCheese = new ExpirableProduct("Expired Cheese", 100.0, 5, true, true, 0.4);
+            Cart cart3 = new Cart();
+            cart3.add(expiredCheese, 1);
+            checkout(customer, cart3);
+        } catch (ECommerceException e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+
+        // Test Case 5: Insufficient balance
+        System.out.println("\n=== Test Case 5: Insufficient Balance Error ===");
+        try {
+            Customer poorCustomer = new Customer("Poor Customer", 50.0);
+            Cart cart4 = new Cart();
+            cart4.add(tv, 1);
+            checkout(poorCustomer, cart4);
+        } catch (ECommerceException e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+
+        // Test Case 6: Non-shippable items only
+        System.out.println("\n=== Test Case 6: Non-shippable Items Only ===");
+        try {
+            Cart cart5 = new Cart();
+            cart5.add(scratchCard, 3);
+            checkout(customer, cart5);
+        } catch (ECommerceException e) {
+            System.out.println("Error: " + e.getMessage());
         }
     }
 }

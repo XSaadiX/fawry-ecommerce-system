@@ -1,46 +1,54 @@
-import java.util.List;
-import java.util.stream.Collectors;
+// Simple shipping service with proper formatting
+class ShippingService {
 
-/**
- * Service for handling shipping operations.
- */
-public class ShippingService {
-    private static final double BASE_SHIPPING_FEE = 20.0;
-    private static final double SHIPPING_RATE_PER_KG = 10.0;
+    static double calculateShipping(Shippable[] shippableItems, int count) {
+        if (count == 0) return 0;
 
-    public static double calculateShippingFee(List<Shippable> items) {
-        if (items == null || items.isEmpty()) {
-            return 0.0;
-        }
-
-        double totalWeight = items.stream()
-                .mapToDouble(Shippable::getWeight)
-                .sum();
-
-        return BASE_SHIPPING_FEE + (totalWeight * SHIPPING_RATE_PER_KG);
+        // Simple shipping calculation
+        return 30; // Flat rate
     }
 
-    public static void processShipment(List<Shippable> items) {
-        if (items == null || items.isEmpty()) {
-            return;
-        }
+    static void processShipment(Shippable[] shippableItems, int count) {
+        if (count == 0) return;
 
         System.out.println("** Shipment notice **");
 
-        items.stream()
-                .collect(Collectors.groupingBy(
-                        Shippable::getName,
-                        Collectors.counting()))
-                .forEach((name, count) -> {
-                    double itemWeight = items.stream()
-                            .filter(item -> item.getName().equals(name))
-                            .findFirst()
-                            .map(Shippable::getWeight)
-                            .orElse(0.0);
-                    System.out.printf("%dx %s %.0fg%n", count, name, itemWeight * 1000);
-                });
+        // Count items by name and display
+        String[] itemNames = new String[count];
+        int[] itemCounts = new int[count];
+        double[] itemWeights = new double[count];
+        int uniqueItems = 0;
 
-        double totalWeight = items.stream().mapToDouble(Shippable::getWeight).sum();
-        System.out.printf("Total package weight %.1fkg%n", totalWeight);
+        for (int i = 0; i < count; i++) {
+            String currentName = shippableItems[i].getName();
+            boolean found = false;
+
+            // Check if we already have this item
+            for (int j = 0; j < uniqueItems; j++) {
+                if (itemNames[j].equals(currentName)) {
+                    itemCounts[j]++;
+                    found = true;
+                    break;
+                }
+            }
+
+            // If not found, add new item
+            if (!found) {
+                itemNames[uniqueItems] = currentName;
+                itemCounts[uniqueItems] = 1;
+                itemWeights[uniqueItems] = shippableItems[i].getWeight();
+                uniqueItems++;
+            }
+        }
+
+        // Print grouped items
+        double totalWeight = 0;
+        for (int i = 0; i < uniqueItems; i++) {
+            double weightInGrams = itemWeights[i] * 1000;
+            System.out.println(itemCounts[i] + "x " + itemNames[i] + " " + (int)weightInGrams + "g");
+            totalWeight = totalWeight + (itemWeights[i] * itemCounts[i]);
+        }
+
+        System.out.println("Total package weight " + totalWeight + "kg");
     }
 }
