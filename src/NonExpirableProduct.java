@@ -1,23 +1,32 @@
-// Non-expirable products like TV and scratch cards
+// Non-expirable products with proper encapsulation
 class NonExpirableProduct extends Product {
-    boolean shippable;
-    double weight;
+    private boolean shippable;
+    private double weight;
 
-    NonExpirableProduct(String name, double price, int quantity, boolean shippable, double weight) {
+    public NonExpirableProduct(String name, double price, int quantity, boolean shippable, double weight) {
         super(name, price, quantity);
         this.shippable = shippable;
         this.weight = weight;
     }
 
-    boolean isExpired() {
-        return false; // Never expires
-    }
-
-    boolean needsShipping() {
+    // Getters for private fields
+    public boolean getShippable() {
         return shippable;
     }
 
-    double getWeight() {
+    // Implementing abstract methods
+    @Override
+    public boolean isExpired() {
+        return false; // Never expires
+    }
+
+    @Override
+    public boolean needsShipping() {
+        return shippable;
+    }
+
+    @Override
+    public double getWeight() {
         return weight;
     }
 }

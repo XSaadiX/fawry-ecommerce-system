@@ -1,36 +1,39 @@
-// Simple Product class
+// Product class with proper encapsulation
 abstract class Product {
-    String name;
-    double price;
-    int quantity;
+    private String name;
+    private double price;
+    private int quantity;
 
-    Product(String name, double price, int quantity) {
+    protected Product(String name, double price, int quantity) {
         this.name = name;
         this.price = price;
         this.quantity = quantity;
     }
 
-    String getName() {
+    // Getters - public methods to access private data
+    public String getName() {
         return name;
     }
 
-    double getPrice() {
+    public double getPrice() {
         return price;
     }
 
-    int getQuantity() {
+    public int getQuantity() {
         return quantity;
     }
 
-    boolean hasStock(int needed) {
+    // Business logic methods
+    public boolean hasStock(int needed) {
         return quantity >= needed;
     }
 
-    void reduceStock(int amount) {
+    public void reduceStock(int amount) {
         quantity = quantity - amount;
     }
 
-    abstract boolean isExpired();
-    abstract boolean needsShipping();
-    abstract double getWeight();
+    // Abstract methods - must be implemented by subclasses
+    public abstract boolean isExpired();
+    public abstract boolean needsShipping();
+    public abstract double getWeight();
 }

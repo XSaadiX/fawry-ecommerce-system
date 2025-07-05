@@ -1,14 +1,14 @@
-// Simple shipping service with proper formatting
+// Shipping service with proper encapsulation
 class ShippingService {
 
-    static double calculateShipping(Shippable[] shippableItems, int count) {
+    public static double calculateShipping(Shippable[] shippableItems, int count) {
         if (count == 0) return 0;
 
         // Simple shipping calculation
         return 30; // Flat rate
     }
 
-    static void processShipment(Shippable[] shippableItems, int count) {
+    public static void processShipment(Shippable[] shippableItems, int count) {
         if (count == 0) return;
 
         System.out.println("** Shipment notice **");

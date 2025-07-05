@@ -1,25 +1,38 @@
-// Expirable products like cheese and biscuits
+// Expirable products with proper encapsulation
 class ExpirableProduct extends Product {
-    boolean expired;
-    boolean shippable;
-    double weight;
+    private boolean expired;
+    private boolean shippable;
+    private double weight;
 
-    ExpirableProduct(String name, double price, int quantity, boolean expired, boolean shippable, double weight) {
+    public ExpirableProduct(String name, double price, int quantity, boolean expired, boolean shippable, double weight) {
         super(name, price, quantity);
         this.expired = expired;
         this.shippable = shippable;
         this.weight = weight;
     }
 
-    boolean isExpired() {
+    // Getters for private fields
+    public boolean getExpired() {
         return expired;
     }
 
-    boolean needsShipping() {
+    public boolean getShippable() {
         return shippable;
     }
 
-    double getWeight() {
+    // Implementing abstract methods
+    @Override
+    public boolean isExpired() {
+        return expired;
+    }
+
+    @Override
+    public boolean needsShipping() {
+        return shippable;
+    }
+
+    @Override
+    public double getWeight() {
         return weight;
     }
 }

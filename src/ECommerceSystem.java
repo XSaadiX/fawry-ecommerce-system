@@ -1,7 +1,7 @@
-// Main e-commerce system with exception handling
+// Main e-commerce system with proper encapsulation
 public class ECommerceSystem {
 
-    static void checkout(Customer customer, Cart cart) throws ECommerceException {
+    public static void checkout(Customer customer, Cart cart) throws ECommerceException {
         // Check if cart is empty
         if (cart.isEmpty()) {
             throw new ECommerceException("Cart is empty");

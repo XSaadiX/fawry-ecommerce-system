@@ -1,17 +1,20 @@
-// Shipping item that implements the Shippable interface
+// Shipping item with proper encapsulation
 class ShippingItem implements Shippable {
-    String name;
-    double weight;
+    private String name;
+    private double weight;
 
-    ShippingItem(String name, double weight) {
+    public ShippingItem(String name, double weight) {
         this.name = name;
         this.weight = weight;
     }
 
+    // Implementing interface methods - must be public
+    @Override
     public String getName() {
         return name;
     }
 
+    @Override
     public double getWeight() {
         return weight;
     }

@@ -1,4 +1,4 @@
-// Simple shipping interface as required by Fawry challenge
+// Shippable interface - defines contract for shipping
 interface Shippable {
     String getName();
     double getWeight();

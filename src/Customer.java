@@ -1,26 +1,28 @@
-// Customer class to handle customer data and balance
+// Customer class with proper encapsulation
 class Customer {
-    String name;
-    double balance;
+    private String name;
+    private double balance;
 
-    Customer(String name, double balance) {
+    public Customer(String name, double balance) {
         this.name = name;
         this.balance = balance;
     }
 
-    String getName() {
+    // Getters - provide read access to private data
+    public String getName() {
         return name;
     }
 
-    double getBalance() {
+    public double getBalance() {
         return balance;
     }
 
-    void pay(double amount) {
+    // Business logic methods that modify private data safely
+    public void pay(double amount) {
         balance = balance - amount;
     }
 
-    boolean canPay(double amount) {
+    public boolean canPay(double amount) {
         return balance >= amount;
     }
 }

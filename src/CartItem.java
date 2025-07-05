@@ -1,22 +1,24 @@
-// Cart item representing a product and its quantity in the cart
+// Cart item with proper encapsulation
 class CartItem {
-    Product product;
-    int quantity;
+    private Product product;
+    private int quantity;
 
-    CartItem(Product product, int quantity) {
+    public CartItem(Product product, int quantity) {
         this.product = product;
         this.quantity = quantity;
     }
 
-    Product getProduct() {
+    // Getters - provide controlled access to private data
+    public Product getProduct() {
         return product;
     }
 
-    int getQuantity() {
+    public int getQuantity() {
         return quantity;
     }
 
-    double getTotalPrice() {
+    // Calculated property - uses private data safely
+    public double getTotalPrice() {
         return product.getPrice() * quantity;
     }
 }

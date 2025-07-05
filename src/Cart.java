@@ -1,14 +1,15 @@
-// Simple cart using arrays with exception handling
+// Cart class with proper encapsulation
 class Cart {
-    CartItem[] items;
-    int itemCount;
+    private CartItem[] items;
+    private int itemCount;
 
-    Cart() {
+    public Cart() {
         items = new CartItem[20]; // Fixed size array
         itemCount = 0;
     }
 
-    void add(Product product, int quantity) throws ECommerceException {
+    // Public method to add items - controls access to private data
+    public void add(Product product, int quantity) throws ECommerceException {
         if (itemCount >= 20) {
             throw new ECommerceException("Cart is full!");
         }
@@ -26,11 +27,12 @@ class Cart {
         itemCount++;
     }
 
-    boolean isEmpty() {
+    // Getters - provide controlled read access
+    public boolean isEmpty() {
         return itemCount == 0;
     }
 
-    double getSubtotal() {
+    public double getSubtotal() {
         double total = 0;
         for (int i = 0; i < itemCount; i++) {
             total = total + items[i].getTotalPrice();
@@ -38,11 +40,11 @@ class Cart {
         return total;
     }
 
-    CartItem[] getItems() {
-        return items;
+    public CartItem[] getItems() {
+        return items; // In real code, we'd return a copy to protect the array
     }
 
-    int getItemCount() {
+    public int getItemCount() {
         return itemCount;
     }
 }
